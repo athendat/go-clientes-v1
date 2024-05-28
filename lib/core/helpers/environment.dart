@@ -344,4 +344,110 @@ query FindCurrentServiceFee {
  }
 }
 ''';
+
+
+static const String findBidsByRequestId= """
+query FindBidsByRequestIdClient(
+        \$requestId: String!
+    ) {
+        findBidsByRequestIdClient(
+            requestId: \$requestId
+        ) {
+            ok
+            message
+
+
+            bids {
+                id
+                no
+                merchantId
+                merchant {
+                    logoUrl
+                    name
+                    address
+                    city
+                    state
+                    nit
+                    phoneNumbers {
+                        phoneNumber
+                        label
+                        stateCode
+                    }
+                    emails {
+                        email
+                        label
+                    }
+                }
+
+                clientId
+                client {
+                    name
+                    lastname1
+                    lastname2
+                    fullname
+                    address
+                    city
+                    state
+                    idNumber
+                    phone
+                    email
+                }
+
+                userId
+                user {
+                    name
+                    lastname1
+                    lastname2
+                    fullname
+                    idNumber
+                }
+
+                requestId
+                
+
+                price
+                pickUpDate
+
+                status
+                changeStatusAt
+
+                rejectedAt
+                rejected
+                rejectObs
+
+                canceledAt
+                canceled
+                cancelObs
+
+                acceptedAt
+                accepted
+            }
+        }
+    }
+""";
+
+
+static const String rejectBid = """
+    mutation RejectBid(\$acceptCancelRejectBidInput: AcceptCancelRejectBidInput!) {
+      rejectBid(
+        acceptCancelRejectBidInput: \$acceptCancelRejectBidInput
+      ) {
+        ok
+        message
+      }
+    }
+""";
+
+
+static const String acceptBid = """
+    mutation AcceptBid(\$acceptCancelRejectBidInput: AcceptCancelRejectBidInput!) {
+      acceptBid(
+        acceptCancelRejectBidInput: \$acceptCancelRejectBidInput
+      ) {
+        ok
+        message
+      }
+    }
+""";
+
 }

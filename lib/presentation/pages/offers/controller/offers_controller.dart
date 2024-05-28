@@ -1,4 +1,3 @@
-import 'package:client.gogogo/presentation/pages/offers/screen/offers_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dropdown_alert/alert_controller.dart';
@@ -28,22 +27,23 @@ enum RequestStatus {
   cancelada,
 }
 
-class HomeController extends FxController {
+class OffersController extends FxController {
   TickerProvider ticker;
 
   var searchvisible = false.obs;
-  HomeController(this.ticker);
+  OffersController(this.ticker,this.requestId);
   late TextEditingController textsearch = TextEditingController(text: "");
   late TextEditingController obsLista = TextEditingController(text: "");
   //List<Product>? products;
   bool showLoading = true, uiLoading = true;
   var loadrequest = false.obs;
-  List<dynamic> requests = [];
+  List<dynamic> bids = [];
   QueryResult? queryResult;
   var lod = false.obs;
   var exeption = false.obs;
   var userid = "".obs;
   List<String> statusfilter = [];
+  final String requestId;
 
   dynamic categoriaList;
   dynamic selectecChoices;
@@ -59,7 +59,7 @@ class HomeController extends FxController {
     textsearch = TextEditingController(text: '');
     obsLista = TextEditingController(text: '');
     loadrequest.value = true;
-    await getrequests();
+    await getBids();
     await rp.getfeeupdate();
     loadrequest.value = false;
   }
@@ -69,7 +69,7 @@ class HomeController extends FxController {
     userid.value = box.get('iduser');
   }
 
-  Future<void> getrequests() async {
+  Future<void> getBids() async {
     loadrequest.value = true;
 
     try {
@@ -100,24 +100,21 @@ class HomeController extends FxController {
       queryResult = await qlClient.query(
         QueryOptions(
             document: gql(
-              Environment.getrequestByIdclient,
+              Environment.findBidsByRequestId,
             ),
             variables: {
-              "filter": statusfilter, //statusfilter.value,
-              "offset": 0,
-              "limit": 50,
-              "sort": "createdAt",
-              "order": "desc",
-              "search": textsearch.text,
+              "requestId":requestId,
             }),
       );
+
       if (queryResult!.data == null && queryResult!.hasException) {
         exeption.value = true;
 
         //throw queryResult!.exception!;
       } else {
         exeption.value = false;
-        requests = queryResult!.data!['findRequestsByClient']['requests'];
+        bids = queryResult!.data!['findBidsByRequestIdClient']['bids'];
+        print(bids);
         //  categoriaList = queryResult!.data!['getrequestsGridData']['categories'];
       }
       loadrequest.value = false;
@@ -128,40 +125,79 @@ class HomeController extends FxController {
     }
   }
 
-  Future<dynamic> requestmarkLista(String requestId) async {
+  Future<dynamic> acceptBid(String bidId) async {
     try {
-      var dateready = DateTime.now().toUtc();
-      var utc = dateready.toIso8601String();
-      var resp = await rp.requestmarkLista(requestId, "obs", utc);
+      
+      var resp = await rp.acceptBid(bidId);
 
       if (resp == true) {
         AlertController.show(
-          "Enhorabuena",
-          "La solicitud ha sido marcada como lista correctamente",
+          "Completado",
+          "Ha aceptado la oferta correctamente",
           TypeAlert.success,
         );
 
         // ignore: use_build_context_synchronously
-        getrequests();
+        getBids();
 
         //okok pop
       } else {
         resp != false
             ? AlertController.show(
-                "Error al intentar de marcar como lista la solicitud",
+                "Error al intentar aceptar la oferta",
                 resp,
                 TypeAlert.warning,
               )
             : AlertController.show(
                 "Error ",
-                "Error al intentar de marcar como lista la solicitud",
+                "Error al intentar aceptar la oferta",
                 TypeAlert.warning,
               );
       }
       return resp;
     } catch (e) {
       AlertController.show(
-        "Error al intentar de actualizar la solicitud",
+        "Error al intentar aceptar la oferta",
+        e.toString(),
+        TypeAlert.error,
+      );
+      return false;
+    }
+  }
+
+  Future<dynamic> rejectBid(String bidId, String reason) async {
+    try {
+      
+      var resp = await rp.rejectBid(bidId, reason);
+
+      if (resp == true) {
+        AlertController.show(
+          "Completado",
+          "Ha rechazado la oferta correctamente",
+          TypeAlert.success,
+        );
+
+        // ignore: use_build_context_synchronously
+        getBids();
+
+        //okok pop
+      } else {
+        resp != false
+            ? AlertController.show(
+                "Error al intentar rechazar la oferta",
+                resp,
+                TypeAlert.warning,
+              )
+            : AlertController.show(
+                "Error ",
+                "Error al intentar rechazar la oferta",
+                TypeAlert.warning,
+              );
+      }
+      return resp;
+    } catch (e) {
+      AlertController.show(
+        "Error al intentar rechazar la oferta",
         e.toString(),
         TypeAlert.error,
       );
@@ -184,13 +220,6 @@ class HomeController extends FxController {
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const SignInUI()),
         (Route<dynamic> route) => false);
-  }
-
-   void goToOffers(String requestId, String requestNo) {
-   
-    Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => OffersPage(requestId: requestId, requestNo: requestNo)),
-        );
   }
 
   void changeselectstatus(int index) {}

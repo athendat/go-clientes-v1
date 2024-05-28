@@ -162,6 +162,15 @@ class ListClientRequest extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        IconButton(
+                              padding: FxSpacing.zero,
+                              icon:Icon(Icons.request_quote,
+                                      color: theme.colorScheme.primary,
+                                      size: 25,
+                                    ),
+                                    onPressed: (){controller.goToOffers(tasks[index]["id"],tasks[index]["tracking"]);},
+                                    ),
+                        
                         Builder(
                           builder: (context) => Obx(() => IconButton(
                               padding: FxSpacing.zero,
@@ -174,7 +183,8 @@ class ListClientRequest extends StatelessWidget {
                                         strokeWidth: 2,
                                       )),
                                     )
-                                  : Icon(
+                                  : 
+                                    Icon(
                                       tasks[index]["status"] != "nueva"
                                           ? Icons.remove_red_eye_rounded
                                           : Icons.edit_rounded,
