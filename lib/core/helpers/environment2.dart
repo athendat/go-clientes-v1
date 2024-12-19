@@ -1,5 +1,5 @@
 class Environments {
-  static const String apigogo = "https://api.go-go-go.app/graphql";
+  static const String apigogo = "https://api2.athendat.site/graphql";
   static const String apiKey =
       "7c040f62cc2e4c4644282aef9dd26b74bec9164182d14sd4g2ff7003bcc37ca6";
 
