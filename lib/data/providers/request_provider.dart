@@ -357,4 +357,140 @@ class RequestProvider {
       return "Error Server";
     }
   }
+
+
+Future<dynamic> acceptBid(String bidId) async {
+    dynamic requests;
+    var box = await Hive.openBox('SessionFR');
+    var token = box.get('token');
+
+    QueryResult? queryResult;
+    try {
+      Map<String, dynamic> variables = {
+        "acceptCancelRejectBidInput": {
+          "id": bidId,
+          "reason": ""
+        }
+        };
+      // print(json.encode(variables));
+      //var variabless = json.encode(variables);
+
+      HttpLink link = HttpLink(Environment.apigogo, defaultHeaders: {
+        'apikey': Environments.apiKeyBalanc,
+        'Authorization': 'Bearer $token'
+      });
+
+      final policies = Policies(
+        fetch: FetchPolicy.noCache,
+      );
+
+      GraphQLClient qlClient = GraphQLClient(
+        link: link,
+        cache: GraphQLCache(
+          store: null,
+        ),
+        defaultPolicies: DefaultPolicies(
+          watchQuery: policies,
+          query: policies,
+          mutate: policies,
+        ),
+      );
+      queryResult = await qlClient.mutate(
+        MutationOptions(
+            document: gql(
+              Environment.acceptBid,
+            ),
+            variables: variables),
+      );
+
+      if (queryResult.data == null && queryResult.hasException) {
+        dynamic error =
+            queryResult.exception!.graphqlErrors[0].message.toString();
+        if (kDebugMode) {
+          // print(error);
+        }
+        requests = error;
+      } else {
+        // exeption.value = false;
+        // requests = queryResult.data!['createRequest']['ok'];
+        requests = true;
+      }
+
+      return requests;
+    } catch (e) {
+      if (kDebugMode) {
+        // print('Error: $e');
+      }
+      return false;
+    }
+  }
+
+
+Future<dynamic> rejectBid(String bidId, String reason) async {
+    dynamic requests;
+    var box = await Hive.openBox('SessionFR');
+    var token = box.get('token');
+
+    QueryResult? queryResult;
+    try {
+      Map<String, dynamic> variables = {
+        "acceptCancelRejectBidInput": {
+          "id": bidId,
+          "reason": reason
+        }
+        };
+      // print(json.encode(variables));
+      //var variabless = json.encode(variables);
+
+      HttpLink link = HttpLink(Environment.apigogo, defaultHeaders: {
+        'apikey': Environments.apiKeyBalanc,
+        'Authorization': 'Bearer $token'
+      });
+
+      final policies = Policies(
+        fetch: FetchPolicy.noCache,
+      );
+
+      GraphQLClient qlClient = GraphQLClient(
+        link: link,
+        cache: GraphQLCache(
+          store: null,
+        ),
+        defaultPolicies: DefaultPolicies(
+          watchQuery: policies,
+          query: policies,
+          mutate: policies,
+        ),
+      );
+      queryResult = await qlClient.mutate(
+        MutationOptions(
+            document: gql(
+              Environment.rejectBid,
+            ),
+            variables: variables),
+      );
+
+      if (queryResult.data == null && queryResult.hasException) {
+        dynamic error =
+            queryResult.exception!.graphqlErrors[0].message.toString();
+        if (kDebugMode) {
+          // print(error);
+        }
+        requests = error;
+      } else {
+        // exeption.value = false;
+        // requests = queryResult.data!['createRequest']['ok'];
+        requests = true;
+      }
+
+      return requests;
+    } catch (e) {
+      if (kDebugMode) {
+        // print('Error: $e');
+      }
+      return false;
+    }
+  }
+
+
 }
